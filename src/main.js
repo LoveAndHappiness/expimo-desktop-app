@@ -1,5 +1,6 @@
 const { app, BrowserWindow } = require('electron');
-const path = require('node:path');
+const path = require('path');
+const { startWatching } = require('./services/fileMonitorService');
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (require('electron-squirrel-startup')) {
@@ -13,6 +14,8 @@ const createWindow = () => {
     height: 600,
     webPreferences: {
       preload: MAIN_WINDOW_PRELOAD_WEBPACK_ENTRY,
+      nodeIntegration: true, // Enable Node.js integration
+      contextIsolation: false, // Disable context isolation
     },
   });
 
@@ -21,6 +24,9 @@ const createWindow = () => {
 
   // Open the DevTools.
   mainWindow.webContents.openDevTools();
+
+  // Start file monitoring
+  startWatching();
 };
 
 // This method will be called when Electron has finished
@@ -29,9 +35,9 @@ const createWindow = () => {
 app.whenReady().then(() => {
   createWindow();
 
-  // On OS X it's common to re-create a window in the app when the
-  // dock icon is clicked and there are no other windows open.
   app.on('activate', () => {
+    // On macOS it's common to re-create a window in the app when the
+    // dock icon is clicked and there are no other windows open.
     if (BrowserWindow.getAllWindows().length === 0) {
       createWindow();
     }
