@@ -93,3 +93,5 @@ out/
 
 /test-files
 config.json
+/coverage
+/.jest
