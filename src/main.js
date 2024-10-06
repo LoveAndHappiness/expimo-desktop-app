@@ -2,6 +2,15 @@ const { app, BrowserWindow, ipcMain } = require('electron');
 const path = require('path');
 const { startWatching, stopWatching, setMainWindow } = require('./services/fileMonitorService');
 
+// Add these lines at the top of the file
+process.on('uncaughtException', (error) => {
+  console.error('Uncaught Exception:', error);
+});
+
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('Unhandled Rejection at:', promise, 'reason:', reason);
+});
+
 function createWindow() {
   console.log('Creating main window');
   const mainWindow = new BrowserWindow({

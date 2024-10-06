@@ -7,7 +7,14 @@
     <h2>Monitored Files ({{ monitoredFiles.length }})</h2>
     <ul>
       <li v-for="file in monitoredFiles" :key="file.path">
-        {{ file.name }} ({{ file.path }})
+        <strong>{{ file.name }}</strong> ({{ file.path }})
+        <div v-if="file.content" class="pdf-content">
+          <h4>PDF Content Preview:</h4>
+          <p>{{ file.content }}</p>
+        </div>
+        <div v-if="file.error" class="error-message">
+          {{ file.error }}
+        </div>
       </li>
     </ul>
     
@@ -114,5 +121,17 @@ li {
   margin-bottom: 10px;
   padding: 10px;
   border-radius: 4px;
+}
+
+.pdf-content {
+  margin-top: 10px;
+  padding: 10px;
+  background-color: #e0e0e0;
+  border-radius: 4px;
+}
+
+.error-message {
+  color: red;
+  margin-top: 5px;
 }
 </style>

@@ -1,3 +1,10 @@
+const rules = require('./webpack.rules');
+
+rules.push({
+  test: /node_modules\/pdf-parse/,
+  use: 'null-loader'
+});
+
 module.exports = {
   /**
    * This is the main entry point for your application, it's the first file
@@ -6,6 +13,12 @@ module.exports = {
   entry: './src/main.js',
   // Put your normal webpack config below here
   module: {
-    rules: require('./webpack.rules'),
+    rules: rules,
   },
+  resolve: {
+    fallback: {
+      "fs": false,
+      "path": false
+    }
+  }
 };
