@@ -1,31 +1,59 @@
-// src/services/fileMonitorService.js
-
 const chokidar = require('chokidar');
 const path = require('path');
+const fs = require('fs');
 const { getConfig } = require('./configService');
 
 let watcher;
+let mainWindow;
+
+function setMainWindow(win) {
+  console.log('Setting main window in fileMonitorService');
+  mainWindow = win;
+}
 
 function startWatching() {
+  console.log('startWatching called in fileMonitorService');
   const config = getConfig();
-  // console.log('Loaded config:', config);  // Log the loaded config
+  console.log('Loaded config:', JSON.stringify(config, null, 2));
 
   const watchDir = path.resolve(config.filesDir);
-  console.log('Watching directory:', watchDir);  // Log the directory being watched
+  console.log('Resolved watch directory:', watchDir);
+
+  // Check if directory exists
+  if (!fs.existsSync(watchDir)) {
+    console.error(`Watch directory does not exist: ${watchDir}`);
+    return;
+  }
+
+  // Log directory contents
+  console.log('Directory contents:');
+  fs.readdirSync(watchDir).forEach(file => {
+    console.log(file);
+  });
 
   if (watcher) {
+    console.log('Closing existing watcher');
     watcher.close();
   }
 
   watcher = chokidar.watch(watchDir, {
     persistent: true,
-    ignoreInitial: true,
+    ignoreInitial: false,
     depth: 0,
   });
 
   watcher.on('add', (filePath) => {
-    console.log(`File added: ${filePath}`);
-    // We'll add file processing logic later
+    console.log(`File detected: ${filePath}`);
+    const fileInfo = {
+      name: path.basename(filePath),
+      path: filePath
+    };
+    if (mainWindow) {
+      console.log('Sending file-detected event to renderer');
+      mainWindow.webContents.send('file-detected', fileInfo);
+    } else {
+      console.log('mainWindow is not set, cannot send file-detected event');
+    }
   });
 
   watcher.on('error', (error) => {
@@ -35,11 +63,10 @@ function startWatching() {
   watcher.on('ready', () => {
     console.log('Initial scan complete. Ready for changes.');
   });
-
-  console.log(`Started watching directory: ${watchDir}`);
 }
 
 function stopWatching() {
+  console.log('stopWatching called in fileMonitorService');
   if (watcher) {
     watcher.close();
     watcher = null;
@@ -50,4 +77,5 @@ function stopWatching() {
 module.exports = {
   startWatching,
   stopWatching,
+  setMainWindow,
 };

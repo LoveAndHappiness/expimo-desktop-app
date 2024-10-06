@@ -1,5 +1,3 @@
-// src/services/configService.js
-
 const path = require('path');
 const fs = require('fs');
 
@@ -9,14 +7,20 @@ function loadConfig() {
   if (config) return config;
 
   const configPath = path.resolve(__dirname, '../../config.json');
+  console.log('Loading config from:', configPath);
+
   if (!fs.existsSync(configPath)) {
     throw new Error(`Config file not found at ${configPath}`);
   }
 
-  const rawData = fs.readFileSync(configPath);
+  const rawData = fs.readFileSync(configPath, 'utf8');
+  console.log('Raw config data:', rawData);
+
   const parsedConfig = JSON.parse(rawData);
 
-  const mode = parsedConfig.mode || 'testing';
+  const mode = parsedConfig.mode || 'production';
+  console.log('Using mode:', mode);
+
   config = parsedConfig[mode];
 
   // Resolve relative paths to absolute paths
@@ -26,6 +30,8 @@ function loadConfig() {
       config[key] = path.resolve(appRoot, config[key]);
     }
   }
+
+  console.log('Resolved config:', JSON.stringify(config, null, 2));
 
   return config;
 }
